@@ -1,5 +1,4 @@
 const Card = require("../models/card");
-const {isValidObjectId}=require('mongoose')
 const httpConstants = require('http2').constants
 
 module.exports.getCards = (req, res) => {
@@ -24,20 +23,18 @@ module.exports.createCard = (req, res) => {
     });
  };
 module.exports.deleteCard = (req, res) => {
-  if (isValidObjectId(req.params.cardId))
-  {Card.findByIdAndRemove(req.params.cardId)
+    Card.findByIdAndRemove(req.params.cardId)
     .then((card) => {{if(card){res.send(`карточка ${card} удалена`)}else{
       res.status(httpConstants.HTTP_STATUS_NOT_FOUND).send({message:`Карточка с id:${req.params.cardId} не найдена`});return
     }}})
-    .catch(() => {
-      res.status(httpConstants.HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: "На сервере произошла ошибка" });
-    });}else{
-      res.status(httpConstants.HTTP_STATUS_BAD_REQUEST).send({message:"Передан некорректный id карточки"});
-    }
+    .catch((err) => {
+      if(err.name ==="CastError"){res.status(httpConstants.HTTP_STATUS_BAD_REQUEST).send({message:"Передан некорректный id карточки"});}else{res.status(httpConstants.HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: "На сервере произошла ошибка" });}
+      
+    });
+
 };
 module.exports.setLike = (req, res) => {
-  if (isValidObjectId(req.params.cardId))
-  {Card.findByIdAndUpdate(req.params.cardId, { $addToSet: { likes: req.user._id } }, { new: true })
+    Card.findByIdAndUpdate(req.params.cardId, { $addToSet: { likes: req.user._id } }, { new: true })
   .populate("owner")
   .populate("likes")
     .then((card) => {
@@ -47,12 +44,13 @@ module.exports.setLike = (req, res) => {
       }
     })
     .catch((err) => {
-      res.status(500).send({ message: err.message });
-    })}else{res.status(httpConstants.HTTP_STATUS_BAD_REQUEST).send({message:"Передан некорректный id карточки"});}
+      if(err.name ==="CastError"){res.status(httpConstants.HTTP_STATUS_BAD_REQUEST).send({message:"Передан некорректный id карточки"})}else{res.status(httpConstants.HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: "На сервере произошла ошибка" })}
+      
+    })
+ 
 };
 module.exports.deleteLike = (req, res) => {
-  if (isValidObjectId(req.params.cardId))
-  {Card.findByIdAndUpdate(req.params.cardId, { $pull: { likes: req.user._id } }, { new: true })
+  Card.findByIdAndUpdate(req.params.cardId, { $pull: { likes: req.user._id } }, { new: true })
   .populate("owner")
   .populate("likes")
     .then((card) => {
@@ -62,6 +60,7 @@ module.exports.deleteLike = (req, res) => {
       }
     })
     .catch((err) => {
-      res.status(500).send({ message: err.message });
-    })}else{res.status(httpConstants.HTTP_STATUS_BAD_REQUEST).send({message:"Передан некорректный id карточки"});}
+      if(err.name ==="CastError"){res.status(httpConstants.HTTP_STATUS_BAD_REQUEST).send({message:"Передан некорректный id карточки"})}else{res.status(httpConstants.HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: "На сервере произошла ошибка" })}
+      
+    })
 };

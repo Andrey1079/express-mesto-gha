@@ -1,6 +1,6 @@
-const { isValidObjectId } = require("mongoose");
 const User = require("../models/user");
 const httpConstants = require('http2').constants;
+
 module.exports.getUsers = (req, res) => {
   User.find({})
     .then((users) => {
@@ -10,21 +10,18 @@ module.exports.getUsers = (req, res) => {
       res.status(httpConstants.HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: "На сервере произошла ошибка" })
     });
 };
-module.exports.getUserById = (req, res) => {
-if(isValidObjectId(req.params.userId))
-{  User.findById(req.params.userId)
+module.exports.getUserById = (req,res) => {
+
+  User.findById(req.params.userId)
     .then((user) => {
-      
-      res.send({ data: user });
+      if (user){ res.send({ data: user })}else{res.status(httpConstants.HTTP_STATUS_NOT_FOUND).send({message:"Пользователь с таким id не найден"});return}
+     
     })
     .catch((err) => {
-      if (err.name === "CastError"){
-        res.status(httpConstants.HTTP_STATUS_NOT_FOUND).send({message:"Пользователь не найден"})
-      }else
-      {res.status(httpConstants.HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: "На сервере произошла ошибка" });}
-    })}else{
-      res.status(httpConstants.HTTP_STATUS_BAD_REQUEST).send({message:"Передан не корректный Id пользователя"})
-    }
+      console.log(err)
+      if(err.name==="CastError"){res.status(httpConstants.HTTP_STATUS_BAD_REQUEST).send('Передан не корректный id')}
+      res.status(httpConstants.HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: "На сервере произошла ошибка" })
+    })
 };
 
 
@@ -34,7 +31,7 @@ module.exports.createUser = (req, res) => {
     .then((user) => res.send({ data: user }))
     .catch((err) =>{
      if (err.name ==="ValidationError" ){
-      res.status(httpConstants.HTTP_STATUS_BAD_REQUEST).send({message:"Переданы некорректные данные"})
+      res.status(httpConstants.HTTP_STATUS_BAD_REQUEST).send({message:"Переданы некорректные данные"});return
      }
 else
    { res.status(httpConstants.HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: "На сервере произошла ошибка" })}
