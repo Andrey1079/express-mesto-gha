@@ -18,8 +18,7 @@ module.exports.getUserById = (req,res) => {
      
     })
     .catch((err) => {
-      console.log(err)
-      if(err.name==="CastError"){res.status(httpConstants.HTTP_STATUS_BAD_REQUEST).send('Передан не корректный id')}
+      if(err.name==="CastError"){res.status(httpConstants.HTTP_STATUS_BAD_REQUEST).send({message:'Передан не корректный id'})}
       res.status(httpConstants.HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: "На сервере произошла ошибка" })
     })
 };
@@ -40,13 +39,13 @@ else
 module.exports.updateUserInfo = (req, res) => {
   if (typeof req.body!=="object" ||Object.keys(req.body).length<1){//проверка на валидность данных, так как в req.body 
     // можно передать любой тип данных и это не приводит к ошибке ValidationError
-    res.status(httpConstants.HTTP_STATUS_BAD_REQUEST).send({message:"1Переданы некорректные данные"})
+    res.status(httpConstants.HTTP_STATUS_BAD_REQUEST).send({message:"Переданы некорректные данные"})
   }else
 {  User.findByIdAndUpdate(req.user._id, req.body, { new: true, runValidators:true })
     .then((user) => res.send({ data: user }))
     .catch((err) =>{
       if (err.name ==="ValidationError" ){
-       res.status(httpConstants.HTTP_STATUS_BAD_REQUEST).send({message:"Переданы некорректные данные"}); return
+       res.status(httpConstants.HTTP_STATUS_BAD_REQUEST).send({message:"Переданы некорректные данные"})
       }
  else
     { res.status(httpConstants.HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: "На сервере произошла ошибка" })}
