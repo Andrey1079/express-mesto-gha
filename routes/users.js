@@ -4,5 +4,5 @@ router.get("/", getUsers);
 router.get("/:userId", getUserById);
 router.post("/", createUser);
 router.patch("/me", updateUserInfo);
-router.patch("/avatar", updateUserInfo);
+router.patch("/me/avatar", updateUserInfo);
 module.exports = router;
