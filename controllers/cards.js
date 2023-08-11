@@ -1,5 +1,6 @@
 const httpConstants = require('http2').constants;
 const Card = require('../models/card');
+const { find } = require('../models/user');
 
 module.exports.getCards = (req, res) => {
   Card.find({})
@@ -29,20 +30,28 @@ module.exports.createCard = (req, res) => {
     });
 };
 module.exports.deleteCard = (req, res) => {
-  Card.findByIdAndRemove(req.params.cardId)
-    .orFail(new Error('idNotFound'))
-    .then(() => res.send({ message: 'Пост удален' }))
-    .catch((err) => {
-      if (err.message === 'idNotFound') {
-        res.status(httpConstants.HTTP_STATUS_NOT_FOUND).send({ message: `Карточка с id:${req.params.cardId} не найдена` });
-        return;
-      }
-      if (err.name === 'CastError') {
-        res.status(httpConstants.HTTP_STATUS_BAD_REQUEST).send({ message: 'Передан некорректный id карточки' });
+  Card.findById(req.params.cardId)
+    .then((card) => {
+      if (req.user._id === card.owner.toString()) {
+        Card.findByIdAndRemove(req.params.cardId)
+          .orFail(new Error('idNotFound'))
+          .then(() => res.send({ message: 'Пост удален' }))
+          .catch((err) => {
+            if (err.message === 'idNotFound') {
+              res.status(httpConstants.HTTP_STATUS_NOT_FOUND).send({ message: `Карточка с id:${req.params.cardId} не найдена` });
+              return;
+            }
+            if (err.name === 'CastError') {
+              res.status(httpConstants.HTTP_STATUS_BAD_REQUEST).send({ message: 'Передан некорректный id карточки' });
+            } else {
+              res.status(httpConstants.HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: 'На сервере произошла ошибка' });
+            }
+          });
       } else {
-        res.status(httpConstants.HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: 'На сервере произошла ошибка' });
+        throw Error('у вас нет прав на удаление данной карточки');
       }
-    });
+    })
+    .catch((err) => res.status(403).send({ message: err.message }));
 };
 
 module.exports.setLike = (req, res) => {

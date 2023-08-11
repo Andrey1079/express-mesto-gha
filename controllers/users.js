@@ -1,5 +1,7 @@
 const httpConstants = require('http2').constants;
 const User = require('../models/user');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 
 module.exports.getUsers = (req, res) => {
   User.find({})
@@ -21,7 +23,7 @@ module.exports.getUserById = (req, res) => {
         return;
       }
       if (err.name === 'CastError') {
-        res.status(httpConstants.HTTP_STATUS_BAD_REQUEST).send({ message: 'Передан не корректный id' });
+        res.status(httpConstants.HTTP_STATUS_BAD_REQUEST).send({ message: 'Передан не корректный id1' });
       } else {
         res.status(httpConstants.HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: 'На сервере произошла ошибка' });
       }
@@ -33,21 +35,23 @@ module.exports.createUser = (req, res) => {
   const {
     name, about, avatar, email, password,
   } = req.body;
-  User.create({
-    name,
-    about,
-    avatar,
-    email,
-    password,
-  })
-    .then((user) => res.status(httpConstants.HTTP_STATUS_CREATED).send({ data: user }))
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        res.status(httpConstants.HTTP_STATUS_BAD_REQUEST).send({ message: err.message });
-      } else {
-        res.status(httpConstants.HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: 'На сервере произошла ошибка' });
-      }
-    });
+  bcrypt.hash(password, 16).then((hash) => {
+    User.create({
+      name,
+      about,
+      avatar,
+      email,
+      password: hash,
+    })
+      .then((user) => res.status(httpConstants.HTTP_STATUS_CREATED).send({ data: user }))
+      .catch((err) => {
+        if (err.name === 'ValidationError') {
+          res.status(httpConstants.HTTP_STATUS_BAD_REQUEST).send({ message: err.message });
+        } else {
+          res.status(httpConstants.HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: 'На сервере произошла ошибка' });
+        }
+      });
+  });
 };
 
 module.exports.updateUserInfo = (req, res) => {
@@ -60,4 +64,20 @@ module.exports.updateUserInfo = (req, res) => {
         res.status(httpConstants.HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: 'На сервере произошла ошибка' });
       }
     });
+};
+
+module.exports.login = (req, res) => {
+  const { email, password } = req.body;
+  User.findUserByCredentials(email, password)
+    .then((user) => {
+      const token = jwt.sign({ _id: user._id }, 'secret-key', { expiresIn: 3600 });
+      res.status(200).send({ token });
+    })
+    .catch((err) => {
+      res.status(401).send({ message: err.message });
+    });
+};
+
+module.exports.getCurrentUserInfo = (req, res) => {
+  User.findById(req.user._id).then((user) => res.status(200).send({ data: user }));
 };
