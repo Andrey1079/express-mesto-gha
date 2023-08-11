@@ -10,6 +10,7 @@ module.exports.getUsers = (req, res) => {
       res.status(httpConstants.HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: 'На сервере произошла ошибка' });
     });
 };
+
 module.exports.getUserById = (req, res) => {
   User.findById(req.params.userId)
     .orFail(new Error('idNotFound'))
@@ -28,8 +29,17 @@ module.exports.getUserById = (req, res) => {
 };
 
 module.exports.createUser = (req, res) => {
-  const { name, about, avatar } = req.body;
-  User.create({ name, about, avatar })
+  // prettier-ignore
+  const {
+    name, about, avatar, email, password,
+  } = req.body;
+  User.create({
+    name,
+    about,
+    avatar,
+    email,
+    password,
+  })
     .then((user) => res.status(httpConstants.HTTP_STATUS_CREATED).send({ data: user }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
@@ -39,6 +49,7 @@ module.exports.createUser = (req, res) => {
       }
     });
 };
+
 module.exports.updateUserInfo = (req, res) => {
   User.findByIdAndUpdate(req.user._id, req.body, { new: true, runValidators: true })
     .then((user) => res.send({ data: user }))
