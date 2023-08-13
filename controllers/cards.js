@@ -9,8 +9,7 @@ const NotFound = require('../Errors/NotFound');
 
 module.exports.getCards = (req, res, next) => {
   Card.find({})
-    .populate('owner')
-    .populate('likes')
+    .populate(['owner', 'likes'])
     .then((cards) => res.send({ data: cards }))
     .catch(next);
 };
@@ -37,7 +36,7 @@ module.exports.deleteCard = (req, res, next) => {
     .orFail(new NotFound('такой карточки не существует'))
     .then((card) => {
       if (req.user._id === card.owner.toString()) {
-        Card.findByIdAndRemove(req.params.cardId)
+        Card.deleteOne(card)
           .then(() => res.send({ message: 'Пост удален' }))
           .catch((err) => {
             if (err instanceof MongooseError) {
@@ -70,8 +69,7 @@ module.exports.deleteCard = (req, res, next) => {
 module.exports.setLike = (req, res, next) => {
   Card.findByIdAndUpdate(req.params.cardId, { $addToSet: { likes: req.user._id } }, { new: true })
     .orFail(new NotFound('такой карточки не существует'))
-    .populate('owner')
-    .populate('likes')
+    .populate(['owner', 'likes'])
     .then((card) => {
       res.send(card);
     })
@@ -96,8 +94,7 @@ module.exports.setLike = (req, res, next) => {
 };
 module.exports.deleteLike = (req, res, next) => {
   Card.findByIdAndUpdate(req.params.cardId, { $pull: { likes: req.user._id } }, { new: true })
-    .populate('owner')
-    .populate('likes')
+    .populate(['owner', 'likes'])
     .orFail(new NotFound('такой карточки не существует'))
     .then((card) => {
       res.send(card);
