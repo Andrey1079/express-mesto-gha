@@ -1,96 +1,123 @@
 const httpConstants = require('http2').constants;
-const Card = require('../models/card');
-const { find } = require('../models/user');
+const { MongooseError } = require('mongoose');
+const escape = require('escape-html');
 
-module.exports.getCards = (req, res) => {
+const Card = require('../models/card');
+const BadRequest = require('../Errors/BadRequest');
+const Forbiden = require('../Errors/Forbiden');
+const NotFound = require('../Errors/NotFound');
+
+module.exports.getCards = (req, res, next) => {
   Card.find({})
     .populate('owner')
     .populate('likes')
     .then((cards) => res.send({ data: cards }))
-    .catch(() => {
-      res.status(httpConstants.HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: 'На сервере произошла ошибка' });
-    });
+    .catch(next);
 };
-module.exports.createCard = (req, res) => {
+module.exports.createCard = (req, res, next) => {
   const { name, link } = req.body;
   const createdAt = new Date();
   Card.create({
-    name,
-    link,
+    name: escape(name),
+    link: escape(link),
     owner: req.user._id,
     createdAt,
   })
     .then((card) => res.status(httpConstants.HTTP_STATUS_CREATED).send({ data: card }))
     .catch((err) => {
-      if (err.name === 'ValidationError') {
-        res.status(httpConstants.HTTP_STATUS_BAD_REQUEST).send({ message: err.message });
-      } else {
-        res.status(httpConstants.HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: 'На сервере произошла ошибка' });
+      if (err instanceof MongooseError) {
+        next(new BadRequest(err.message));
+        return;
       }
+      next(err);
     });
 };
-module.exports.deleteCard = (req, res) => {
+module.exports.deleteCard = (req, res, next) => {
   Card.findById(req.params.cardId)
+    .orFail(new NotFound('такой карточки не существует'))
     .then((card) => {
       if (req.user._id === card.owner.toString()) {
         Card.findByIdAndRemove(req.params.cardId)
-          .orFail(new Error('idNotFound'))
           .then(() => res.send({ message: 'Пост удален' }))
           .catch((err) => {
-            if (err.message === 'idNotFound') {
-              res.status(httpConstants.HTTP_STATUS_NOT_FOUND).send({ message: `Карточка с id:${req.params.cardId} не найдена` });
-              return;
+            if (err instanceof MongooseError) {
+              switch (err.statusCode) {
+                case '400':
+                  next(new BadRequest(err.message));
+                  break;
+                case '404':
+                  next(new NotFound(err.message));
+                  break;
+                default:
+              }
             }
-            if (err.name === 'CastError') {
-              res.status(httpConstants.HTTP_STATUS_BAD_REQUEST).send({ message: 'Передан некорректный id карточки' });
-            } else {
-              res.status(httpConstants.HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: 'На сервере произошла ошибка' });
-            }
+
+            next(err);
           });
       } else {
-        throw Error('у вас нет прав на удаление данной карточки');
+        throw new Forbiden('у вас нет прав на удаление данной карточки');
       }
     })
-    .catch((err) => res.status(403).send({ message: err.message }));
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        next(new BadRequest('не корректный id'));
+        return;
+      }
+      next(err);
+    });
 };
 
-module.exports.setLike = (req, res) => {
+module.exports.setLike = (req, res, next) => {
   Card.findByIdAndUpdate(req.params.cardId, { $addToSet: { likes: req.user._id } }, { new: true })
-    .orFail(new Error('idNotFound'))
+    .orFail(new NotFound('такой карточки не существует'))
     .populate('owner')
     .populate('likes')
     .then((card) => {
       res.send(card);
     })
     .catch((err) => {
-      if (err.message === 'idNotFound') {
-        res.status(httpConstants.HTTP_STATUS_NOT_FOUND).send({ message: `Карточка с id:${req.params.cardId} не найдена` });
-        return;
+      if (err instanceof MongooseError) {
+        switch (err.statusCode) {
+          case '400':
+            next(new BadRequest(err.message));
+            break;
+          case '404':
+            next(new NotFound(err.message));
+            break;
+          default:
+        }
+        if (err.name === 'CastError') {
+          next(new BadRequest('не корректный id'));
+          return;
+        }
       }
-      if (err.name === 'CastError') {
-        res.status(httpConstants.HTTP_STATUS_BAD_REQUEST).send({ message: 'Передан некорректный id карточки' });
-      } else {
-        res.status(httpConstants.HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: 'На сервере произошла ошибка' });
-      }
+      next(err);
     });
 };
-module.exports.deleteLike = (req, res) => {
+module.exports.deleteLike = (req, res, next) => {
   Card.findByIdAndUpdate(req.params.cardId, { $pull: { likes: req.user._id } }, { new: true })
     .populate('owner')
     .populate('likes')
-    .orFail(new Error('idNotFound'))
+    .orFail(new NotFound('такой карточки не существует'))
     .then((card) => {
       res.send(card);
     })
     .catch((err) => {
-      if (err.message === 'idNotFound') {
-        res.status(httpConstants.HTTP_STATUS_NOT_FOUND).send({ message: `Карточка с id:${req.params.cardId} не найдена` });
-        return;
+      if (err instanceof MongooseError) {
+        switch (err.statusCode) {
+          case '400':
+            next(new BadRequest(err.message));
+            break;
+          case '404':
+            next(new NotFound(err.message));
+            break;
+          default:
+        }
+        if (err.name === 'CastError') {
+          next(new BadRequest('не корректный id'));
+          return;
+        }
       }
-      if (err.name === 'CastError') {
-        res.status(httpConstants.HTTP_STATUS_BAD_REQUEST).send({ message: 'Передан некорректный id карточки' });
-      } else {
-        res.status(httpConstants.HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: 'На сервере произошла ошибка' });
-      }
+      next(err);
     });
 };

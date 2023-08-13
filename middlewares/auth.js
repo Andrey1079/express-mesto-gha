@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken');
+const UnAuthorized = require('../Errors/UnAuthorized');
 
 module.exports = (req, res, next) => {
   const { authorization } = req.headers;
@@ -11,9 +12,8 @@ module.exports = (req, res, next) => {
   try {
     payload = jwt.verify(token, 'secret-key');
   } catch (err) {
-    return res.status(401).send({ message: 'Необходима авторизация1' });
+    next(new UnAuthorized(err.message));
   }
-
   req.user = payload;
   return next();
 };
