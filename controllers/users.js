@@ -56,7 +56,16 @@ module.exports.createUser = (req, res, next) => {
       email,
       password: hash,
     })
-      .then((user) => res.status(httpConstants.HTTP_STATUS_CREATED).send({ data: user }))
+      .then((user) => {
+        res.status(httpConstants.HTTP_STATUS_CREATED).send({
+          name: user.name,
+          about: user.about,
+          avatar: user.avatar,
+          email: user.email,
+          _id: user._id,
+        });
+      })
+
       .catch((err) => {
         if (err instanceof MongooseError) {
           next(new BadRequest(err.message));
@@ -96,11 +105,7 @@ module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
   User.findUserByCredentials(email, password)
     .then((user) => {
-      const token = jwt.sign(
-        { _id: user._id },
-        NODE_ENV === 'production' ? JWT_SECRET : '123456789',
-        { expiresIn: '7d' },
-      );
+      const token = jwt.sign({ _id: user._id }, NODE_ENV === 'production' ? JWT_SECRET : '123456789', { expiresIn: '7d' });
       res.send({ token });
     })
     .catch((err) => {

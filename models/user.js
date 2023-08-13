@@ -30,9 +30,9 @@ const userSchema = new mongoose.Schema(
     },
     password: {
       type: String,
+      select: false,
       required: [true, 'Поле "password" должно быть заполнено '],
       minlength: [8, 'Минимальная длина поля "about" -8 символа'],
-      select: false,
     },
   },
   { versionKey: false },
