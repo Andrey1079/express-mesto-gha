@@ -1,0 +1,326 @@
+{
+	"info": {
+		"_postman_id": "4d21e4be-f46f-45c1-a510-99ca52210b71",
+		"name": "backend Mesto",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "27533305"
+	},
+	"item": [
+		{
+			"name": "user",
+			"item": [
+				{
+					"name": "cписок всех пользователей",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NGQ4YTYxODc5NTFjMTZlYjM2MDFiYzEiLCJpYXQiOjE2OTE5MzQxMzUsImV4cCI6MTY5MjUzODkzNX0.JDnHuGVtCACWhDkyrlwWJEMgJspi-DRIagaZDqUQSdc",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "token",
+								"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NGQ1ZGQ0MDYxMmRhNjZkODYxODI2ODAiLCJpYXQiOjE2OTE3Mzc0NTksImV4cCI6MTY5MTc0MTA1OX0.a2osQ8BjLaPJIxDs5revi-KEx4MTOdtJNuyAZPRgDrk",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "localhost:3000/users",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "пользователь по id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "localhost:3000/users/64c9e8d28468b3bd48c84ca1aasdasdasd",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"users",
+								"64c9e8d28468b3bd48c84ca1aasdasdasd"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "стартовая информация",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NGQ2MTMxOTA0OWVmNzhkNDM4MWZkYTgiLCJpYXQiOjE2OTE3NTI1MzcsImV4cCI6MTY5MTc1NjEzN30.S01iuSY-eruifn7j3ica0HIvZNT0aAwtiWsaAOFP-CU",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "localhost:3000/users/me",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"users",
+								"me"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "редактирорвание профиля",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NGQ2MWZkZjIwYjNiOGE2MGU5ZGE3OTciLCJpYXQiOjE2OTE4Mjk4NDQsImV4cCI6MTY5MjQzNDY0NH0.WrND_7AOvjIxBqfsMmMzsoi9lx_vVYjYXxfLPhkGHpo",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"about\":\"codding<>\"}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:3000/users/me",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"users",
+								"me"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "редактирорвание аватара",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"avatar\":\"http://\"}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:3000/users/avatar",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"users",
+								"avatar"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "создать пользователя",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{ \"name\":\"a\"\"email\":\"ya124@mail.org\", \"password\":\"12345678\", \"avatar\":\"https://images.unsplash.com/photo-1691698139354-201a6b38da1d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxlZGl0b3JpYWwtZmVlZHwzfHx8ZW58MHx8fHx8&auto=format&fit=crop&w=500&q=60\" }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:3000/signup",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"signup"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "login",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{ \"email\":\"mail@mail.com\", \"password\":\"asdfasdfqwer12345asdasdz151\"}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:3000/login",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"login"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "cards",
+			"item": [
+				{
+					"name": "установить лайк",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "localhost:3000/cards/64c897f1f252aeb79cc6a190/likes",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"cards",
+								"64c897f1f252aeb79cc6a190",
+								"likes"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "удалить лайк",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "localhost:3000/cards/64c897f1f252aeb79cc6a190/likes",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"cards",
+								"64c897f1f252aeb79cc6a190",
+								"likes"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "получить все карточки",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "localhost:3000/cards",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"cards"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "удалить карточку",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "localhost:3000/cards/64c753bc6282bdab39f21481",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"cards",
+								"64c753bc6282bdab39f21481"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "создать карточку",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"name\":\"smth\",\"link\":\"http://smth.ru\"}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:3000/cards",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"cards"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
